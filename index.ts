@@ -1,13 +1,13 @@
 import './style.css';
 
-import { of, map, pipe, take, filter, Observable } from 'rxjs';
+import { of, map, pipe, take, pluck, filter, Observable } from 'rxjs';
 
 const users = {
   data: [
     {
       name: 'Piotr',
       age: 32,
-      pet: null,
+      pet: 'cat',
     },
     {
       name: 'Michal',
@@ -22,22 +22,38 @@ const users = {
   ],
 };
 
+const usersWithoutAnimals = {
+  data: [
+    {
+      name: 'Piotr',
+      age: 32,
+      pet: null,
+    },
+    {
+      name: 'Michal',
+      age: 45,
+      pet: undefined,
+    },
+    {
+      name: 'Krystian',
+      age: 29,
+      pet: '',
+    },
+  ],
+};
+
 const observable = new Observable((subscriber) => {
   subscriber.next(users);
+  subscriber.next(usersWithoutAnimals);
 }).pipe(
   map((value) => {
     value.data.filter((object) => {
       if (object.pet === null) {
-        object.pet = 'horse';
+        throw new Error('No animal!');
       }
     });
     return value.data;
-  }),
-  map((value) => {
-    console.log('second map', value);
-    return value;
-  }),
-  take(1)
+  })
 );
 
 const observer = {
@@ -48,7 +64,7 @@ const observer = {
 
   // if error
   error: (err) => {
-    console.log('Observer got error', err);
+    console.log('Observer got error' + err);
   },
 
   // if complete
